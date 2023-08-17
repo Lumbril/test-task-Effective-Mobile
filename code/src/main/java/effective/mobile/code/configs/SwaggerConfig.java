@@ -20,7 +20,7 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(
                         new Info()
-                                .title("Документация API для сайта Awooo")
+                                .title("Документация API для сайта Social Media")
                                 .version("1.0.0")
                 );
     }

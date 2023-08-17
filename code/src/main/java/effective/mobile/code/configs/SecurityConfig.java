@@ -11,17 +11,13 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        /*httpSecurity
-                .authorizeRequests()
-                .antMatchers(
-                        "/", "/login", "/resources/**", "/static/**", "/test/**", "/question/**",
-                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger/**"
-                ).permitAll();*/
         http
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers(
-                                "/**", "/resources/**", "/static/**",
-                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger/**")
+                                "/resources/**", "/static/**",
+                                "/v3/api-docs/**", "/swagger-ui/**",
+                                "/swagger-ui.html", "/swagger/**",
+                                "/user/**")
                         .permitAll()
                 );
 
