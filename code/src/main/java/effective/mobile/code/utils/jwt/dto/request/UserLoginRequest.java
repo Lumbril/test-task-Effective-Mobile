@@ -1,4 +1,4 @@
-package effective.mobile.code.dto.request;
+package effective.mobile.code.utils.jwt.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

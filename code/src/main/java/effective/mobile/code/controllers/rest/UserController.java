@@ -1,10 +1,11 @@
 package effective.mobile.code.controllers.rest;
 
-import effective.mobile.code.dto.request.UserLoginRequest;
-import effective.mobile.code.dto.response.JwtTokenPairResponse;
+import effective.mobile.code.utils.jwt.dto.request.UserLoginRequest;
+import effective.mobile.code.utils.jwt.dto.request.UserRegisterRequest;
+import effective.mobile.code.utils.jwt.dto.response.JwtTokenPairResponse;
 import effective.mobile.code.entities.User;
 import effective.mobile.code.services.UserServices;
-import effective.mobile.code.utils.jwt.services.AuthenticationService;
+import effective.mobile.code.utils.jwt.services.JwtAuthenticationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserServices userServices;
-    private final AuthenticationService authenticationService;
+    private final JwtAuthenticationService jwtAuthenticationService;
 
     @GetMapping("/all")
     public ResponseEntity<List<User>> getUsers() {
         return ResponseEntity.ok().body(userServices.getAll());
+    }
+
+    @PostMapping("/registration")
+    public ResponseEntity<JwtTokenPairResponse> registration(
+            @RequestBody UserRegisterRequest userRegisterRequest
+            ) {
+        return ResponseEntity.ok().body(
+                jwtAuthenticationService.register(userRegisterRequest)
+        );
     }
 
     @PostMapping("/login")
@@ -30,7 +40,7 @@ public class UserController {
             @RequestBody UserLoginRequest userLoginRequest
             ) {
         return ResponseEntity.ok().body(
-                new JwtTokenPairResponse("sdfdsf", "dsdfsdf")
+                jwtAuthenticationService.authenticate(userLoginRequest)
         );
     }
 }

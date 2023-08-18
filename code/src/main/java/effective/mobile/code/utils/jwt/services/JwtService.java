@@ -1,5 +1,6 @@
 package effective.mobile.code.utils.jwt.services;
 
+import effective.mobile.code.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -7,13 +8,13 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -26,8 +27,16 @@ public class JwtService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long REFRESH_TOKEN_EXPIRATION;
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public Long extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+
+        return claims.get("user_id", Long.class);
+    }
+
+    public String extractType(String token) {
+        Claims claims = extractAllClaims(token);
+
+        return claims.get("token_type", String.class);
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -36,39 +45,45 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(User userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, ACCESS_TOKEN_EXPIRATION);
+    public String generateToken(Map<String, Object> extraClaims, User userDetails) {
+        return buildToken(extraClaims, userDetails, "access", ACCESS_TOKEN_EXPIRATION);
     }
 
     public String generateRefreshToken(
-            UserDetails userDetails
+            User userDetails
     ) {
-        return buildToken(new HashMap<>(), userDetails, REFRESH_TOKEN_EXPIRATION);
+        return buildToken(new HashMap<>(), userDetails, "refresh", REFRESH_TOKEN_EXPIRATION);
     }
 
     public String buildToken(
             Map<String, Object> extraClaims,
-            UserDetails userDetails,
+            User userDetails,
+            String type,
             long expiration
     ) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setHeaderParam("typ","JWT")
+                .claim("user_id", userDetails.getId())
+                .claim("token_type", type)
+                .setId(UUID.randomUUID().toString())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) &&
-                !isTokenExpired(token);
+    public boolean isTokenValid(String token) {
+        if (!isTokenExpired(token)) {
+            return false;
+        }
+
+        return true;
     }
 
     private boolean isTokenExpired(String token) {
