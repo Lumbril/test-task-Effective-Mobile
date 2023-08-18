@@ -28,7 +28,7 @@
             </column>
         </createTable>
 
-        <createTable tableName="users_roles">
+<!--        <createTable tableName="users_roles">
             <column name="user_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
@@ -47,7 +47,7 @@
                                  baseColumnNames="roles_id"
                                  constraintName="fk_user_role_role"
                                  referencedTableName="roles"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"/>-->
     </changeSet>
 
 </databaseChangeLog>
