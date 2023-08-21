@@ -3,14 +3,17 @@ package effective.mobile.code.utils.jwt.services;
 import effective.mobile.code.entities.User;
 import effective.mobile.code.entities.enums.Role;
 import effective.mobile.code.repositories.UserRepository;
+import effective.mobile.code.utils.jwt.dto.request.RefreshTokenRequest;
 import effective.mobile.code.utils.jwt.dto.request.UserLoginRequest;
 import effective.mobile.code.utils.jwt.dto.request.UserRegisterRequest;
 import effective.mobile.code.utils.jwt.dto.response.JwtTokenPairResponse;
+import effective.mobile.code.utils.jwt.exceptions.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Service
 @RequiredArgsConstructor
@@ -52,11 +55,30 @@ public class JwtAuthenticationService {
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        System.out.println(jwtService.isTokenValid(accessToken));
-
         return JwtTokenPairResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .build();
+    }
+
+    @ExceptionHandler
+    public JwtTokenPairResponse refreshTokens(RefreshTokenRequest refreshTokenRequest) throws InvalidTokenException {
+        String refreshToken = refreshTokenRequest.getRefreshToken();
+
+        if (!(jwtService.extractType(refreshToken).equals("refresh"))) {
+            throw new InvalidTokenException();
+        }
+
+        User user = userRepository.findById(
+                jwtService.extractUserId(refreshToken)
+        ).orElseThrow();
+
+        String newAccessToken = jwtService.generateToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+
+        return JwtTokenPairResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
                 .build();
     }
 }

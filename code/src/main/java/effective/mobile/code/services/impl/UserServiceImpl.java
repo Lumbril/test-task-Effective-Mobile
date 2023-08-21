@@ -1,9 +1,8 @@
 package effective.mobile.code.services.impl;
 
-import effective.mobile.code.entities.enums.Role;
 import effective.mobile.code.entities.User;
 import effective.mobile.code.repositories.UserRepository;
-import effective.mobile.code.services.UserServices;
+import effective.mobile.code.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UserServiceImpl implements UserServices {
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
