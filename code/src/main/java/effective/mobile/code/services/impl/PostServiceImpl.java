@@ -1,11 +1,16 @@
 package effective.mobile.code.services.impl;
 
 import effective.mobile.code.dto.request.PostRequest;
+import effective.mobile.code.dto.response.PostPageResponse;
+import effective.mobile.code.dto.response.PostResponse;
 import effective.mobile.code.entities.Post;
 import effective.mobile.code.exceptions.NotFindEntity;
 import effective.mobile.code.repositories.PostRepository;
 import effective.mobile.code.services.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Principal;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +82,22 @@ public class PostServiceImpl implements PostService {
         } else {
             throw new NotFindEntity("post");
         }
+    }
+
+    @Override
+    public PostPageResponse getPostsForUser(Principal principal, int page, int size) {
+        Pageable paging = PageRequest.of(page, size);
+
+        Page<Post> postPage = postRepository.findAll(paging);
+
+        return PostPageResponse.builder()
+                .posts(postPage.getContent()
+                        .stream().map(post -> new PostResponse(post))
+                        .collect(Collectors.toList()))
+                .currentPage(postPage.getNumber())
+                .totalItems(postPage.getTotalElements())
+                .totalPages(postPage.getTotalPages())
+                .build();
     }
 
     private String saveImage(PostRequest postRequest) {

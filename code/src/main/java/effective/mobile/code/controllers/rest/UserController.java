@@ -1,5 +1,7 @@
 package effective.mobile.code.controllers.rest;
 
+import effective.mobile.code.dto.response.PostPageResponse;
+import effective.mobile.code.services.PostService;
 import effective.mobile.code.utils.jwt.dto.request.RefreshTokenRequest;
 import effective.mobile.code.utils.jwt.dto.request.UserLoginRequest;
 import effective.mobile.code.utils.jwt.dto.request.UserRegisterRequest;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @Tag(name = "User", description = "user API")
@@ -22,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final PostService postService;
     private final JwtAuthenticationService jwtAuthenticationService;
 
     @GetMapping("/all")
@@ -62,6 +66,17 @@ public class UserController {
                             .build()
             );
         }
+    }
+
+    @GetMapping("/posts")
+    public ResponseEntity<PostPageResponse> posts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size,
+            Principal principal
+    ) {
+        return ResponseEntity.ok().body(
+                postService.getPostsForUser(principal, page, size)
+        );
     }
 
 /*    @ExceptionHandler(InvalidTokenException.class)
