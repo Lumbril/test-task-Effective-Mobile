@@ -46,6 +46,29 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Post partialUpdate(Long id, PostRequest postRequest) throws NotFindEntity {
+        if (postRepository.existsById(id)) {
+            Post post = postRepository.getById(id);
+
+            if (postRequest.getTitle() != null) {
+                post.setTitle(postRequest.getTitle());
+            }
+
+            if (postRequest.getText() != null) {
+                post.setText(postRequest.getText());
+            }
+
+            if (postRequest.getImage() != null) {
+                post.setImageURL(saveImage(postRequest));
+            }
+
+            return postRepository.save(post);
+        } else {
+            throw new NotFindEntity("post");
+        }
+    }
+
+    @Override
     public void deletePost(Long id) throws NotFindEntity {
         if (postRepository.existsById(id)) {
             postRepository.deleteById(id);
